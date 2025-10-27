@@ -14,7 +14,7 @@
 
 use rodio::{
     source::{Buffered, Source},
-    Decoder, OutputStream, OutputStreamHandle, Sink,
+    Decoder, OutputStream, OutputStreamBuilder, Sink,
 };
 use std::collections::HashMap;
 use std::io::{Cursor, Read};
@@ -31,19 +31,18 @@ pub struct Audio {
     clips: HashMap<String, Buffered<Decoder<Cursor<Vec<u8>>>>>,
     channels: Vec<Sink>,
     current_channel: usize,
-    output: Option<(OutputStream, OutputStreamHandle)>,
+    output: Option<OutputStream>,
 }
 
 impl Audio {
     /// Create a new sound subsystem.  You only need one of these -- you can use it to load and play
     /// any number of audio clips.
     pub fn new() -> Self {
-        if let Ok(output) = OutputStream::try_default() {
+        if let Ok(output) = OutputStreamBuilder::open_default_stream() {
             let clips = HashMap::new();
             let mut channels: Vec<Sink> = Vec::new();
-            for i in 0..4 {
-                let sink = Sink::try_new(&output.1)
-                    .unwrap_or_else(|_| panic!("Failed to create sound channel {}", i));
+            for _ in 0..4 {
+                let sink = Sink::connect_new(output.mixer());
                 channels.push(sink);
             }
             Self {
