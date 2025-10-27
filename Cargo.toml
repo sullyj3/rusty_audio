@@ -11,4 +11,4 @@ categories = [ "game-development", "multimedia::audio" ]
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-rodio = "0.17.1"
+rodio = "0.20.1"
